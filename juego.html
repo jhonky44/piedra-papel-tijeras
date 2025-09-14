@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Piedra, Papel o Tijeras con Nombres</title>
+<style>
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+    }
+    70% {
+      transform: scale(1.1);
+      box-shadow: 0 0 10px 15px rgba(52, 152, 219, 0);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1c2833, #34495e);
+    color: white;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  h1 {
+    font-size: 2.8rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px #3498db;
+  }
+  .input-nombres {
+    margin-bottom: 30px;
+  }
+  input[type="text"] {
+    font-size: 18px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    margin: 0 10px;
+    width: 180px;
+    max-width: 80vw;
+  }
+  button#btnComenzar {
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 12px;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 5px #1e8449;
+    transition: background-color 0.3s;
+  }
+  button#btnComenzar:hover {
+    background: #1e8449;
+  }
+  .jugador {
+    background: #2c3e50;
+    padding: 20px;
+    border-radius: 12px;
+    width: 280px;
+    margin: 20px auto;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+  }
+  .jugador.oculto {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .opciones {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-top: 15px;
+  }
+  button.opcion-btn {
+    width: 70px;
+    height: 70px;
+    background-color: #3498db;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 5px #2980b9;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  button.opcion-btn:hover {
+    animation: pulse 1s ease forwards;
+    background-color: #2980b9;
+    box-shadow: 0 0 20px 5px #2980b9;
+    transform: scale(1.2);
+    z-index: 10;
+  }
+  button.opcion-btn:active {
+    box-shadow: 0 2px #1f618d;
+    transform: translateY(3px);
+  }
+  button.opcion-btn.seleccionado {
+    animation: pulse 1s ease forwards;
+    background-color: #27ae60 !important;
+    box-shadow: 0 0 25px 10px #27ae60 !important;
+    transform: scale(1.15);
+  }
+  #resultado {
+    margin-top: 40px;
+    font-size: 28px;
+    font-weight: bold;
+    min-height: 80px;
+    opacity: 0;
+    animation: fadeIn 1s forwards;
+  }
+  #resultado.gana {
+    color: #2ecc71;
+    text-shadow: 0 0 10px #27ae60;
+  }
+  #resultado.pierde {
+    color: #e74c3c;
+    text-shadow: 0 0 10px #c0392b;
+  }
+  #resultado.empate {
+    color: #f1c40f;
+    text-shadow: 0 0 10px #f39c12;
+  }
+  #btnReiniciar {
+    margin-top: 30px;
+    background: #e67e22;
+    box-shadow: 0 5px #d35400;
+    border: none;
+    color: white;
+    padding: 15px 50px;
+    font-size: 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: none;
+  }
+  #btnReiniciar:hover {
+    background: #d35400;
+    box-shadow: 0 7px #a04000;
+  }
+</style>
+</head>
+<body>
+
+<h1>Piedra, Papel o Tijeras</h1>
+
+<div class="input-nombres">
+  <input type="text" id="nombreJugador1" placeholder="Nombre jugador 1" />
+  <input type="text" id="nombreJugador2" placeholder="Nombre jugador 2" />
+  <button id="btnComenzar">Comenzar</button>
+</div>
+
+<div id="jugador1" class="jugador oculto">
+  <p><strong><span id="nombre1Mostrar"></span>, escoge tu opción:</strong></p>
+  <div class="opciones">
+    <button class="opcion-btn" data-opcion="piedra" title="Piedra"></button>
+    <button class="opcion-btn" data-opcion="papel" title="Papel"></button>
+    <button class="opcion-btn" data-opcion="tijeras" title="Tijeras"></button>
+  </div>
+</div>
+
+<div id="jugador2" class="jugador oculto">
+  <p><strong><span id="nombre2Mostrar"></span>, escoge tu opción:</strong></p>
+  <div class="opciones">
+    <button class="opcion-btn" data-opcion="piedra" title="Piedra"></button>
+    <button class="opcion-btn" data-opcion="papel" title="Papel"></button>
+    <button class="opcion-btn" data-opcion="tijeras" title="Tijeras"></button>
+  </div>
+</div>
+
+<div id="resultado"></div>
+<button id="btnReiniciar">Jugar otra ronda</button>
+
+<script>
+  const inputNombre1 = document.getElementById('nombreJugador1');
+  const inputNombre2 = document.getElementById('nombreJugador2');
+  const btnComenzar = document.getElementById('btnComenzar');
+  const jugador1Div = document.getElementById('jugador1');
+  const jugador2Div = document.getElementById('jugador2');
+  const nombre1Mostrar = document.getElementById('nombre1Mostrar');
+  const nombre2Mostrar = document.getElementById('nombre2Mostrar');
+  const resultadoDiv = document.getElementById('resultado');
+  const btnReiniciar = document.getElementById('btnReiniciar');
+
+  let nombreJugador1 = '';
+  let nombreJugador2 = '';
+  let seleccionJugador1 = null;
+  let seleccionJugador2 = null;
+
+  btnComenzar.addEventListener('click', () => {
+    nombreJugador1 = inputNombre1.value.trim() || 'Jugador 1';
+    nombreJugador2 = inputNombre2.value.trim() || 'Jugador 2';
+
+    nombre1Mostrar.textContent = nombreJugador1;
+    nombre2Mostrar.textContent = nombreJugador2;
+
+    document.querySelector('.input-nombres').style.display = 'none';
+    jugador1Div.style.display = 'block';
+    jugador2Div.style.display = 'none';
+    jugador1Div.classList.remove('oculto');
+    jugador2Div.classList.add('oculto');
+
+    resultadoDiv.textContent = '';
+    btnReiniciar.style.display = 'none';
+  });
+
+  function ocultarJugador(jugadorDiv) {
+    jugadorDiv.classList.add('oculto');
+    setTimeout(() => jugadorDiv.style.display = 'none', 500);
+  }
+
+  function mostrarJugador(jugadorDiv) {
+    jugadorDiv.style.display = 'block';
+    setTimeout(() => jugadorDiv.classList.remove('oculto'), 10);
+  }
+
+  jugador1Div.querySelectorAll('button.opcion-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      seleccionJugador1 = btn.getAttribute('data-opcion');
+      btn.classList.add('seleccionado');
+      ocultarJugador(jugador1Div);
+      mostrarJugador(jugador2Div);
+      resultadoDiv.style.opacity = 0;
+      resultadoDiv.textContent = `${nombreJugador2}, es tu turno...`;
+      btnReiniciar.style.display = 'none';
+    });
+  });
+
+  jugador2Div.querySelectorAll('button.opcion-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      seleccionJugador2 = btn.getAttribute('data-opcion');
+      btn.classList.add('seleccionado');
+      ocultarJugador(jugador2Div);
+      mostrarResultado();
+      btnReiniciar.style.display = 'inline-block';
+    });
+  });
+
+  function mostrarResultado() {
+    resultadoDiv.style.opacity = 0;
+    let mensaje = '';
+
+    resultadoDiv.className = '';
+
+    if (seleccionJugador1 === seleccionJugador2) {
+      mensaje = `Dos Makias empatados: ${nombreJugador1} y ${nombreJugador2}`;
+      resultadoDiv.classList.add('empate');
+    } else if (
+      (seleccionJugador1 === 'piedra' && seleccionJugador2 === 'tijeras') ||
+      (seleccionJugador1 === 'papel' && seleccionJugador2 === 'piedra') ||
+      (seleccionJugador1 === 'tijeras' && seleccionJugador2 === 'papel')
+    ) {
+      // Gana jugador 1
+      mensaje = `${nombreJugador1} es El Makia y ${nombreJugador2} es El Bobo`;
+      resultadoDiv.classList.add('gana');
+    } else {
+      // Gana jugador 2
+      mensaje = `${nombreJugador2} es El Makia y ${nombreJugador1} es El Bobo`;
+      resultadoDiv.classList.add('gana');
+    }
+
+    resultadoDiv.innerHTML = mensaje;
+    resultadoDiv.style.animation = 'fadeIn 1s forwards';
+  }
+
+  btnReiniciar.addEventListener('click', () => {
+    seleccionJugador1 = null;
+    seleccionJugador2 = null;
+    resultadoDiv.textContent = '';
+    resultadoDiv.style.opacity = 0;
+    resultadoDiv.className = '';
+    btnReiniciar.style.display = 'none';
+
+    ocultarJugador(jugador2Div);
+    mostrarJugador(jugador1Div);
+
+    jugador1Div.querySelectorAll('button.opcion-btn').forEach(b => b.classList.remove('seleccionado'));
+    jugador2Div.querySelectorAll('button.opcion-btn').forEach(b => b.classList.remove('seleccionado'));
+  });
+</script>
+
+</body>
+</html>
